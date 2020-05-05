@@ -2,8 +2,9 @@ import 'whatwg-fetch'
 
 class APIManager {
     static backendURL() {
-        if (process.env.BACKEND_URL != null) {
-            return process.env.BACKEND_URL
+        console.log(process.env)
+        if (process.env.REACT_APP_BACKEND_URL != null) {
+            return process.env.REACT_APP_BACKEND_URL
         } else {
             return "http://localhost:8080/"
         }
