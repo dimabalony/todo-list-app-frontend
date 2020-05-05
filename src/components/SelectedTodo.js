@@ -27,7 +27,7 @@ class SelectedTodo extends Component {
                     </div>
                 </div>
                 <br/>
-                <EditTodoForm id={todo.id} handleEditTodo={handleEditTodo} />
+                <EditTodoForm todo={todo} handleEditTodo={handleEditTodo} />
             </div>
         );
     }

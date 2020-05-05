@@ -3,9 +3,9 @@ import EditTodoFormComponent from "./EditTodoFormComponent";
 
 class EditTodoForm extends React.Component {
     state = {
-        title: "",
-        date: "",
-        status: "To do"
+        title: this.props.todo.title,
+        date: this.props.todo.date,
+        status: this.props.todo.status
     };
 
     constructor(props) {
@@ -26,9 +26,9 @@ class EditTodoForm extends React.Component {
         event.preventDefault();
         let object = {
             title: this.state.title,
-            date: this.state.date.length === 0 ? null : this.state.date,
+            date: this.state.date,
             status: this.state.status,
-            id: this.props.id
+            id: this.props.todo.id
         };
         this.props.handleEditTodo(object);
     }

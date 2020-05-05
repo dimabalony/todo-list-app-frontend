@@ -59,7 +59,8 @@ class App extends React.Component {
             .then((result) => {
                 this.setState(prevState => {
                     return {
-                        todos: prevState.todos.concat([result])
+                        todos: prevState.todos.concat([result]),
+                        selectedTodo: result
                     }
                 })
             })
