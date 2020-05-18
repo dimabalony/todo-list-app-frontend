@@ -13,7 +13,8 @@ class APIManager {
         const url = this.backendURL() + "todos";
 
         return fetch(url, {
-            credentials: 'include'
+            credentials: 'include',
+            mode: 'cors'
         })
     }
 
@@ -23,7 +24,8 @@ class APIManager {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(todo),
-            credentials: 'include'
+            credentials: 'include',
+            mode: 'cors'
         };
 
         return fetch(url, requestOptions)
@@ -35,7 +37,8 @@ class APIManager {
             method: 'PUT',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(todo),
-            credentials: 'include'
+            credentials: 'include',
+            mode: 'cors'
         };
 
         return fetch(url, requestOptions)
@@ -45,7 +48,8 @@ class APIManager {
         const url = this.backendURL() + "todos/" + id;
         const requestOptions = {
             method: 'DELETE',
-            credentials: 'include'
+            credentials: 'include',
+            mode: 'cors'
         };
         return fetch(url, requestOptions)
     }
@@ -56,7 +60,8 @@ class APIManager {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(credentials),
-            credentials: 'include'
+            credentials: 'include',
+            mode: 'cors'
         };
         return fetch(url, requestOptions)
     }
@@ -67,7 +72,8 @@ class APIManager {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(credentials),
-            credentials: 'include'
+            credentials: 'include',
+            mode: 'cors'
         };
         return fetch(url, requestOptions)
     }
@@ -77,7 +83,8 @@ class APIManager {
         const requestOptions = {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            credentials: 'include'
+            credentials: 'include',
+            mode: 'cors'
         };
         return fetch(url, requestOptions)
     }
