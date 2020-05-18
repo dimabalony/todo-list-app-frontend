@@ -37,6 +37,7 @@ class AddTodoForm extends React.Component {
             <AddTodoFormComponent
                 handleChange={this.handleChange}
                 handleSubmit={this.handleSubmit}
+                handleLogout={this.props.handleLogout}
                 data={this.state}
             />
         )

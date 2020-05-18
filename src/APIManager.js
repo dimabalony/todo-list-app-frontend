@@ -2,7 +2,6 @@ import 'whatwg-fetch'
 
 class APIManager {
     static backendURL() {
-        console.log(process.env)
         if (process.env.REACT_APP_BACKEND_URL != null) {
             return process.env.REACT_APP_BACKEND_URL
         } else {
@@ -13,8 +12,9 @@ class APIManager {
     static getTodos() {
         const url = this.backendURL() + "todos";
 
-        return fetch(url)
-            .then(response => response.json())
+        return fetch(url, {
+            credentials: 'include'
+        })
     }
 
     static postTodo(todo) {
@@ -22,30 +22,62 @@ class APIManager {
         const requestOptions = {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(todo)
+            body: JSON.stringify(todo),
+            credentials: 'include'
         };
 
         return fetch(url, requestOptions)
-            .then(response => response.json())
     }
 
     static updateTodo(todo) {
-        console.log(todo);
         const url = this.backendURL() + "todos/" + todo.id;
         const requestOptions = {
             method: 'PUT',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(todo)
+            body: JSON.stringify(todo),
+            credentials: 'include'
         };
 
         return fetch(url, requestOptions)
-            .then(response => response.json())
     }
 
     static deleteTodo(id) {
         const url = this.backendURL() + "todos/" + id;
         const requestOptions = {
-            method: 'DELETE'
+            method: 'DELETE',
+            credentials: 'include'
+        };
+        return fetch(url, requestOptions)
+    }
+
+    static signIn(credentials) {
+        const url = this.backendURL() + "sign-in"
+        const requestOptions = {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(credentials),
+            credentials: 'include'
+        };
+        return fetch(url, requestOptions)
+    }
+
+    static signUp(credentials) {
+        const url = this.backendURL() + "sign-up"
+        const requestOptions = {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(credentials),
+            credentials: 'include'
+        };
+        return fetch(url, requestOptions)
+    }
+
+    static logout() {
+        const url = this.backendURL() + "logout"
+        const requestOptions = {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            credentials: 'include'
         };
         return fetch(url, requestOptions)
     }

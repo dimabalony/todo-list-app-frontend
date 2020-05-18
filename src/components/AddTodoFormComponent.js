@@ -4,7 +4,13 @@ import 'bootstrap/dist/css/bootstrap.css';
 function AddTodoFormComponent(props) {
     return (
         <div className="card">
-            <h4 className="card-header">Create TODO</h4>
+            <div className="card-header">
+                <h4>Create TODO</h4>
+                <button onClick={ () => props.handleLogout() } className="btn btn-danger float-right">
+                    Log out
+                </button>
+            </div>
+
             <form className="card-body" onSubmit={props.handleSubmit}>
                 <div className="mb-3">
                     <label>Title of the task:
