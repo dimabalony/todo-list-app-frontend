@@ -4,6 +4,7 @@ import APIManager from "../APIManager";
 import 'bootstrap/dist/css/bootstrap.css';
 import SelectedTodo from "./SelectedTodo";
 import AddTodoForm from "./AddTodoForm";
+import SocketManager from "../SocketManager";
 
 class AuthenticatedApp extends React.Component {
     state = {
@@ -24,29 +25,63 @@ class AuthenticatedApp extends React.Component {
     }
 
     componentDidMount() {
-        this._asyncRequest = this.getTodos();
+        this.subscribeToTodos();
     }
 
     componentWillUnmount() {
-        if (this._asyncRequest) {
-            this._asyncRequest.cancel();
-        }
+        this.unsubscribeFromTodos();
     }
 
-    getTodos() {
-        APIManager.getTodos()
-            .then((response) => {
-                if (response.ok) {
-                    const parsedJSON = response.json();
-                    parsedJSON.then((todos) => {
-                        this.setState({
-                            todos: todos
-                        });
-                    });
-                } else if (response.status === 401) {
-                    this.props.setAuthenticated(false);
-                }
-            });
+    subscribeToTodos() {
+        SocketManager.subscribeToTodos((response) => {
+            switch (response.type) {
+                case "post":
+                    const todo = JSON.parse(response.json);
+                    this.setState(prevState => {
+                        return {
+                            todos: prevState.todos.concat([todo]),
+                            selectedTodo: todo
+                        }
+                    })
+                    break
+                case "put":
+                    const selectedTodo = JSON.parse(response.json);
+                    this.setState(prevState => {
+                        const updatedList = prevState.todos.map((item) => {
+                            if (item.id === response.id) {
+                                return selectedTodo
+                            } else {
+                                return item
+                            }
+                        })
+                        return {
+                            todos: updatedList,
+                            selectedTodo: selectedTodo
+                        }
+                    })
+                    break
+                case "delete":
+                    this.setState(prevState => {
+                        return {
+                            todos: prevState.todos.filter(todo => todo.id !== response.id)
+                        }
+                    })
+                    break
+                case "get":
+                    const todos = JSON.parse(response.json);
+                    this.setState({
+                        todos: todos
+                    })
+                    break
+                default: break
+            }
+        }, (error) => {
+            this.props.setAuthenticated(false)
+        });
+    }
+
+    unsubscribeFromTodos() {
+        SocketManager.unsubscribeFromTodos();
     }
 
     handleSelectTodo(todo) {
@@ -62,64 +97,15 @@ class AuthenticatedApp extends React.Component {
     }
 
     handleAddTodo(todo) {
-        APIManager.postTodo(todo)
-            .then((response) => {
-                if (response.ok) {
-                    const parsedJSON = response.json();
-                    parsedJSON.then((todo) => {
-                        this.setState(prevState => {
-                            return {
-                                todos: prevState.todos.concat([todo]),
-                                selectedTodo: todo
-                            }
-                        })
-                    });
-                } else if (response.status === 401) {
-                    this.props.setAuthenticated(false)
-                }
-            })
+        SocketManager.sendTodo(todo);
     }
 
     handleDeleteTodo(id) {
-        APIManager.deleteTodo(id)
-            .then((response) => {
-                if (response.ok) {
-                    this.setState(prevState => {
-                        return {
-                            todos: prevState.todos.filter(todo => todo.id !== id)
-                        }
-                    })
-                } else if (response.status === 401) {
-                    this.props.setAuthenticated(false)
-                }
-            })
+        SocketManager.deleteTodo(id);
     }
 
     handleEditTodo(todo) {
-        APIManager.updateTodo(todo)
-            .then((response) => {
-                if (response.ok) {
-                    const parsedJSON = response.json();
-                    parsedJSON.then((result) => {
-                        this.setState(prevState => {
-                            const updatedList = prevState.todos.map((item) => {
-                                if (item.id === result.id) {
-                                    return result
-                                } else {
-                                    return item
-                                }
-                            })
-                            return {
-                                todos: updatedList,
-                                selectedTodo: result
-                            }
-                        })
-                    });
-
-                } else if (response.status === 401) {
-                    this.props.setAuthenticated(false)
-                }
-            })
+        SocketManager.updateTodo(todo);
     }
 
     handleLogout() {
@@ -129,7 +115,6 @@ class AuthenticatedApp extends React.Component {
                     this.props.setAuthenticated(false);
                 }
             })
-
     }
 
     render() {
