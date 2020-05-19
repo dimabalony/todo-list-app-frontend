@@ -2,8 +2,8 @@ import 'whatwg-fetch'
 
 class SocketManager {
     static backendURL() {
-        if (process.env.REACT_APP_BACKEND_URL != null) {
-            return process.env.REACT_APP_BACKEND_URL
+        if (process.env.REACT_APP_SOCKET_URL != null) {
+            return process.env.REACT_APP_SOCKET_URL
         } else {
             return "ws://localhost:8080/"
         }
