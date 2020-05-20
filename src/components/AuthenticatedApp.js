@@ -5,6 +5,7 @@ import 'bootstrap/dist/css/bootstrap.css';
 import SelectedTodo from "./SelectedTodo";
 import AddTodoForm from "./AddTodoForm";
 import SocketManager from "../SocketManager";
+import GraphQLManager from "../GraphQLManager";
 
 class AuthenticatedApp extends React.Component {
     state = {
@@ -25,63 +26,22 @@ class AuthenticatedApp extends React.Component {
     }
 
     componentDidMount() {
-        this.subscribeToTodos();
+        this._asyncRequest = this.getTodos();
     }
 
     componentWillUnmount() {
-        this.unsubscribeFromTodos();
+        if (this._asyncRequest) {
+            this._asyncRequest.cancel();
+        }
     }
 
-    subscribeToTodos() {
-        SocketManager.subscribeToTodos((response) => {
-            switch (response.type) {
-                case "post":
-                    const todo = JSON.parse(response.json);
-                    this.setState(prevState => {
-                        return {
-                            todos: prevState.todos.concat([todo]),
-                            selectedTodo: todo
-                        }
-                    })
-                    break
-                case "put":
-                    const selectedTodo = JSON.parse(response.json);
-                    this.setState(prevState => {
-                        const updatedList = prevState.todos.map((item) => {
-                            if (item.id === response.id) {
-                                return selectedTodo
-                            } else {
-                                return item
-                            }
-                        })
-                        return {
-                            todos: updatedList,
-                            selectedTodo: selectedTodo
-                        }
-                    })
-                    break
-                case "delete":
-                    this.setState(prevState => {
-                        return {
-                            todos: prevState.todos.filter(todo => todo.id !== response.id)
-                        }
-                    })
-                    break
-                case "get":
-                    const todos = JSON.parse(response.json);
-                    this.setState({
-                        todos: todos
-                    })
-                    break
-                default: break
-            }
-        }, (error) => {
-            this.props.setAuthenticated(false)
-        });
-    }
-
-    unsubscribeFromTodos() {
-        SocketManager.unsubscribeFromTodos();
+    getTodos() {
+        GraphQLManager.getInstance().getTodos()
+            .then((response) => {
+                this.setState({
+                    todos: response.data.todos
+                });
+            });
     }
 
     handleSelectTodo(todo) {
@@ -97,15 +57,45 @@ class AuthenticatedApp extends React.Component {
     }
 
     handleAddTodo(todo) {
-        SocketManager.sendTodo(todo);
+        GraphQLManager.getInstance().postTodo(todo)
+            .then((response) => {
+                this.setState(prevState => {
+                    return {
+                        todos: prevState.todos.concat([response.data.createTodo]),
+                        selectedTodo: response.data.createTodo
+                    }
+                })
+            })
     }
 
     handleDeleteTodo(id) {
-        SocketManager.deleteTodo(id);
+        GraphQLManager.getInstance().deleteTodo(id)
+            .then((response) => {
+                this.setState(prevState => {
+                    return {
+                        todos: prevState.todos.filter(todo => todo.id !== id)
+                    }
+                })
+            })
     }
 
     handleEditTodo(todo) {
-        SocketManager.updateTodo(todo);
+        GraphQLManager.getInstance().updateTodo(todo)
+            .then((response) => {
+                this.setState(prevState => {
+                    const updatedList = prevState.todos.map((item) => {
+                        if (item.id === response.data.updateTodo.id) {
+                            return response.data.updateTodo
+                        } else {
+                            return item
+                        }
+                    })
+                    return {
+                        todos: updatedList,
+                        selectedTodo: response.data.updateTodo
+                    }
+                })
+            })
     }
 
     handleLogout() {

@@ -1,6 +1,7 @@
 import React from 'react';
 import AuthenticatedApp from "./AuthenticatedApp";
 import UnauthenticatedApp from "./UnauthenticatedApp/";
+import GraphQLManager from "../GraphQLManager";
 
 class App extends React.Component {
     state = {
@@ -11,6 +12,9 @@ class App extends React.Component {
         super(props);
 
         this.setAuthenticated = this.setAuthenticated.bind(this);
+        GraphQLManager.getInstance().setupClient(() => {
+            this.setAuthenticated(false);
+        })
     }
 
     render() {
