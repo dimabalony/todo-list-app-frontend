@@ -4,6 +4,8 @@ import APIManager from "../APIManager";
 import 'bootstrap/dist/css/bootstrap.css';
 import SelectedTodo from "./SelectedTodo";
 import AddTodoForm from "./AddTodoForm";
+import SocketManager from "../SocketManager";
+import GraphQLManager from "../GraphQLManager";
 
 class AuthenticatedApp extends React.Component {
     state = {
@@ -34,18 +36,11 @@ class AuthenticatedApp extends React.Component {
     }
 
     getTodos() {
-        APIManager.getTodos()
+        GraphQLManager.getInstance().getTodos()
             .then((response) => {
-                if (response.ok) {
-                    const parsedJSON = response.json();
-                    parsedJSON.then((todos) => {
-                        this.setState({
-                            todos: todos
-                        });
-                    });
-                } else if (response.status === 401) {
-                    this.props.setAuthenticated(false);
-                }
+                this.setState({
+                    todos: response.data.todos
+                });
             });
     }
 
@@ -62,63 +57,44 @@ class AuthenticatedApp extends React.Component {
     }
 
     handleAddTodo(todo) {
-        APIManager.postTodo(todo)
+        GraphQLManager.getInstance().postTodo(todo)
             .then((response) => {
-                if (response.ok) {
-                    const parsedJSON = response.json();
-                    parsedJSON.then((todo) => {
-                        this.setState(prevState => {
-                            return {
-                                todos: prevState.todos.concat([todo]),
-                                selectedTodo: todo
-                            }
-                        })
-                    });
-                } else if (response.status === 401) {
-                    this.props.setAuthenticated(false)
-                }
+                this.setState(prevState => {
+                    return {
+                        todos: prevState.todos.concat([response.data.createTodo]),
+                        selectedTodo: response.data.createTodo
+                    }
+                })
             })
     }
 
     handleDeleteTodo(id) {
-        APIManager.deleteTodo(id)
+        GraphQLManager.getInstance().deleteTodo(id)
             .then((response) => {
-                if (response.ok) {
-                    this.setState(prevState => {
-                        return {
-                            todos: prevState.todos.filter(todo => todo.id !== id)
-                        }
-                    })
-                } else if (response.status === 401) {
-                    this.props.setAuthenticated(false)
-                }
+                this.setState(prevState => {
+                    return {
+                        todos: prevState.todos.filter(todo => todo.id !== id)
+                    }
+                })
             })
     }
 
     handleEditTodo(todo) {
-        APIManager.updateTodo(todo)
+        GraphQLManager.getInstance().updateTodo(todo)
             .then((response) => {
-                if (response.ok) {
-                    const parsedJSON = response.json();
-                    parsedJSON.then((result) => {
-                        this.setState(prevState => {
-                            const updatedList = prevState.todos.map((item) => {
-                                if (item.id === result.id) {
-                                    return result
-                                } else {
-                                    return item
-                                }
-                            })
-                            return {
-                                todos: updatedList,
-                                selectedTodo: result
-                            }
-                        })
-                    });
-
-                } else if (response.status === 401) {
-                    this.props.setAuthenticated(false)
-                }
+                this.setState(prevState => {
+                    const updatedList = prevState.todos.map((item) => {
+                        if (item.id === response.data.updateTodo.id) {
+                            return response.data.updateTodo
+                        } else {
+                            return item
+                        }
+                    })
+                    return {
+                        todos: updatedList,
+                        selectedTodo: response.data.updateTodo
+                    }
+                })
             })
     }
 
@@ -129,7 +105,6 @@ class AuthenticatedApp extends React.Component {
                     this.props.setAuthenticated(false);
                 }
             })
-
     }
 
     render() {
